@@ -24,16 +24,9 @@ Clone the repo:
 git clone git@github.com:nathansrf/juliet-test-suite-c.git juliet && cd juliet
 ```
 
-Run all test cases:
-
-```sh
-
-```
-
-** OR **
-
 Run a specific CWE test case:
 
 ```sh
-
+python3 juliet.py -cgmr 416
+python3 parse-cwe-status.py bin/CWE416/bad.run 
 ```
