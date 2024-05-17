@@ -61,6 +61,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
     args.CWEs = set(args.CWEs)
 
+    if len(sys.argv) == 1:
+        parser.print_help()
+        parser.exit()
+
     testcases = root_dir + "/testcases"
     if not os.path.exists(testcases):
         juliet_print("no testcases directory")
