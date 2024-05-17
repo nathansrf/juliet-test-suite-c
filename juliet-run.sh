@@ -11,26 +11,26 @@
 ulimit -c 0
 
 SCRIPT_DIR=$(dirname $(realpath "$0"))
-CWE=$1
-TIMEOUT=${2:-"1s"}
+CWE=""
+TIMEOUT=""
 PRELOAD_PATH=""
 INPUT_FILE="/tmp/in.txt"
 touch $INPUT_FILE
 
-# if [ $# -ge 1 ]
-# then
-#   TIMEOUT="$1"
-# fi
-
-# if [ $# -ge 2 ]
-# then
-#   PRELOAD_PATH="$2"
-#   if [ ! -f "${PRELOAD_PATH}" ]
-#   then
-#     echo "preload path ${PRELOAD_PATH} does not exist - not running tests"
-#     exit 1
-#   fi
-# fi
+if [ $# -eq 2 ]; then
+  CWE=$1
+  TIMEOUT=${2:-"1s"}
+elif [ $# -eq 3 ]; then
+  PRELOAD_PATH="$2"
+  if [ ! -f "${PRELOAD_PATH}" ]; then
+    echo "preload path ${PRELOAD_PATH} does not exist - not running tests"
+    exit 1
+  fi
+  TIMEOUT=${3:-"1s"}
+else
+  echo "Invalid number of arguments"
+  exit
+fi
 
 # parameter 1: the CWE directory corresponding to the tests
 # parameter 2: the type of tests to run (should be "good" or "bad")
@@ -49,7 +49,7 @@ run_tests()
 
     if [ ! -z "${PRELOAD_PATH}" ]
     then
-      timeout "${TIMEOUT}" env LD_CHERI_PRELOAD="${PRELOAD_PATH}" "${TESTCASE_PATH}" < "${INPUT_FILE}"
+      timeout "${TIMEOUT}" LD_PRELOAD="${PRELOAD_PATH}" "${TESTCASE_PATH}" < "${INPUT_FILE}"
     else
       timeout "${TIMEOUT}" "${TESTCASE_PATH}" < "${INPUT_FILE}"
     fi

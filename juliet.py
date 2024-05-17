@@ -43,6 +43,8 @@ def make(path, keep_going):
 def run(CWE, output_dir, timeout):
     subprocess.Popen([root_dir + "/" + output_dir + "/juliet-run.sh", str(CWE), timeout]).wait()
 
+def run_with_library(CWE, output_dir, lib_path, timeout):
+    subprocess.Popen([root_dir + "/" + output_dir + "/juliet-run.sh", str(CWE), lib_path, timeout]).wait()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="build and run Juliet test cases for targeted CWEs")
@@ -52,6 +54,7 @@ if __name__ == "__main__":
     parser.add_argument("-m", "--make", action="store_true", help="use make to build test cases for the targeted CWES")
     parser.add_argument("-r", "--run", action="store_true", help="run tests for the targeted CWEs")
     parser.add_argument("-a", "--all", action="store_true", help="target all CWEs")
+    parser.add_argument("-l", "--library", action="store", help="Path to dynamic library for use in test case (uses LD_PRELOAD)")
     parser.add_argument("-k", "--keep-going", action="store_true", help="keep going in case of build failures")
     parser.add_argument("-o", "--output-dir", action="store", default="bin", help="specify the output directory relative to the directory containing this script (default: bin)")
     parser.add_argument("-t", "--run-timeout", action="store", default=".01", type=float, help="specify the default test run timeout in seconds (type: float, default: .01)")
@@ -88,4 +91,7 @@ if __name__ == "__main__":
                     make(path, args.keep_going)
                 if args.run:
                     juliet_print("running " + path)
-                    run(parsed_CWE, args.output_dir, str(args.run_timeout) + "s")
+                    if args.library:
+                        run_with_library(parsed_CWE, args.output_dir, args.library, str(args.run_timeout) + "s")
+                    else:
+                        run(parsed_CWE, args.output_dir, str(args.run_timeout) + "s")
