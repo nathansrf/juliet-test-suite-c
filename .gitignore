@@ -1,0 +1,6 @@
+bin/
+CMakeFiles/
+testcases/*/CMakeCache.txt
+testcases/*/CMakeLists.txt
+testcases/*/Makefile
+testcases/*/cmake_install.cmake

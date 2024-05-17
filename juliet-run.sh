@@ -58,5 +58,5 @@ run_tests()
   cd "${PREV_CWD}"
 }
 
-run_tests "${SCRIPT_DIR}/bin" "good"
-run_tests "${SCRIPT_DIR}/bin" "bad"
+run_tests "${SCRIPT_DIR}/$CWE" "good"
+run_tests "${SCRIPT_DIR}/$CWE" "bad"
