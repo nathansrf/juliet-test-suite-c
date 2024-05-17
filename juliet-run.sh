@@ -11,24 +11,26 @@
 ulimit -c 0
 
 SCRIPT_DIR=$(dirname $(realpath "$0"))
-TIMEOUT="1s"
+CWE=$1
+TIMEOUT=${2:-"1s"}
 PRELOAD_PATH=""
 INPUT_FILE="/tmp/in.txt"
+touch $INPUT_FILE
 
-if [ $# -ge 1 ]
-then
-  TIMEOUT="$1"
-fi
+# if [ $# -ge 1 ]
+# then
+#   TIMEOUT="$1"
+# fi
 
-if [ $# -ge 2 ]
-then
-  PRELOAD_PATH="$2"
-  if [ ! -f "${PRELOAD_PATH}" ]
-  then
-    echo "preload path ${PRELOAD_PATH} does not exist - not running tests"
-    exit 1
-  fi
-fi
+# if [ $# -ge 2 ]
+# then
+#   PRELOAD_PATH="$2"
+#   if [ ! -f "${PRELOAD_PATH}" ]
+#   then
+#     echo "preload path ${PRELOAD_PATH} does not exist - not running tests"
+#     exit 1
+#   fi
+# fi
 
 # parameter 1: the CWE directory corresponding to the tests
 # parameter 2: the type of tests to run (should be "good" or "bad")
@@ -58,5 +60,5 @@ run_tests()
   cd "${PREV_CWD}"
 }
 
-run_tests "${SCRIPT_DIR}/$CWE" "good"
-run_tests "${SCRIPT_DIR}/$CWE" "bad"
+run_tests "${SCRIPT_DIR}/CWE$CWE" "good"
+run_tests "${SCRIPT_DIR}/CWE$CWE" "bad"
