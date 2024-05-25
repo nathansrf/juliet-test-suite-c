@@ -72,15 +72,15 @@ run_tests()
     if [ ! -z "${PRELOAD_PATH}" ]
     then
       if [ ! -z "${QEMU}" ]; then
-        timeout "${TIMEOUT}" ${QEMU} -E LD_PRELOAD="${PRELOAD_PATH}" "${TESTCASE_PATH}" < "${INPUT_FILE}"
+        timeout ${TIMEOUT} ${QEMU} -E LD_PRELOAD=${PRELOAD_PATH} ${TESTCASE_PATH} < ${INPUT_FILE}
       else
-        timeout "${TIMEOUT}" env LD_PRELOAD="${PRELOAD_PATH}" "${TESTCASE_PATH}" < "${INPUT_FILE}"
+        timeout ${TIMEOUT} env LD_PRELOAD=${PRELOAD_PATH} ${TESTCASE_PATH} < ${INPUT_FILE}
       fi
     else
       if [ ! -z "${QEMU}" ]; then
-        timeout "${TIMEOUT}" ${QEMU} "${TESTCASE_PATH}" < "${INPUT_FILE}"
+        timeout ${TIMEOUT} ${QEMU} ${TESTCASE_PATH} < ${INPUT_FILE}
       else
-        timeout "${TIMEOUT}" "${TESTCASE_PATH}" < "${INPUT_FILE}"
+        timeout ${TIMEOUT} ${TESTCASE_PATH} < ${INPUT_FILE}
       fi
     fi
 
