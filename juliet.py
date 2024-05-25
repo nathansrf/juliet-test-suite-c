@@ -48,7 +48,7 @@ def run(CWE, output_dir, timeout, with_qemu=False, qemu_path=None):
 
 def run_with_library(CWE, output_dir, lib_path, timeout, with_qemu=False, qemu_path=None):
     if with_qemu:
-         subprocess.Popen([root_dir + "/" + output_dir + "/juliet-run.sh", "-c", str(CWE), "-p", lib_path, "-t", timeout, "-q", qemu_path]).wait()
+         subprocess.Popen([root_dir + "/" + output_dir + "/juliet-run.sh", "-c", str(CWE), "-p", lib_path, "-t", timeout, "-q", str(qemu_path)]).wait()
     else:
         subprocess.Popen([root_dir + "/" + output_dir + "/juliet-run.sh", "-c", str(CWE), "-p", lib_path, "-t", timeout]).wait()
 
@@ -63,8 +63,8 @@ if __name__ == "__main__":
     parser.add_argument("-l", "--library", action="store", help="Path to dynamic library for use in test case (uses LD_PRELOAD)")
     parser.add_argument("-k", "--keep-going", action="store_true", help="keep going in case of build failures")
     parser.add_argument("-o", "--output-dir", action="store", default="bin", help="specify the output directory relative to the directory containing this script (default: bin)")
-    parser.add_argument("-t", "--run-timeout", action="store", default=".01", type=float, help="specify the default test run timeout in seconds (type: float, default: .01)")
-    parser.add_argument("--qemu", action="store_true", help="enable running of test in usermode QEMU")
+    parser.add_argument("-t", "--run-timeout", action="store", default="1", type=float, help="specify the default test run timeout in seconds (type: float, default: 1)")
+    parser.add_argument("-q", "--qemu", action="store_true", help="enable running of test in usermode QEMU")
     parser.add_argument("--qemu_path", action="store", default="qemu-aarch64", type=str, help="path to qemu binary (default 'qemu-aarch64')")
     args = parser.parse_args()
     args.CWEs = set(args.CWEs)
@@ -104,6 +104,6 @@ if __name__ == "__main__":
                 if args.run:
                     juliet_print("running " + path)
                     if args.library:
-                        run_with_library(parsed_CWE, args.output_dir, args.library, str(args.run_timeout, with_qemu=args.qemu, qemu_path=args.qemu_path) + "s")
+                        run_with_library(parsed_CWE, args.output_dir, args.library, str(args.run_timeout) + "s", with_qemu=args.qemu, qemu_path=args.qemu_path)
                     else:
                         run(parsed_CWE, args.output_dir, str(args.run_timeout) + "s", with_qemu=args.qemu, qemu_path=args.qemu_path)
