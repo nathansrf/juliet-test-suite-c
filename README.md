@@ -28,5 +28,5 @@ Run a specific CWE test case:
 
 ```sh
 python3 juliet.py -cgmr 416
-python3 parse-cwe-status.py bin/CWE416/bad.run 
+python3 parse-cwe-status.py bin/CWE416/bad.run
 ```
