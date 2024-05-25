@@ -10,27 +10,49 @@
 
 ulimit -c 0
 
-SCRIPT_DIR=$(dirname $(realpath "$0"))
-CWE=""
-TIMEOUT=""
-PRELOAD_PATH=""
-INPUT_FILE="/tmp/in.txt"
-touch $INPUT_FILE
+usage() {
+  echo "$0 -c CWE_NUMBER -t TIMEOUT -p PRE_LOAD_LIB_PATH -i INPUT_FILE_PATH -q QEMU_COMMAND"
+}
 
-if [ $# -eq 2 ]; then
-  CWE=$1
-  TIMEOUT=${2:-"1s"}
-elif [ $# -eq 3 ]; then
-  PRELOAD_PATH="$2"
-  if [ ! -f "${PRELOAD_PATH}" ]; then
-    echo "preload path ${PRELOAD_PATH} does not exist - not running tests"
-    exit 1
-  fi
-  TIMEOUT=${3:-"1s"}
-else
-  echo "Invalid number of arguments"
-  exit
+# default arg values
+SCRIPT_DIR=$(dirname $(realpath "$0"))
+TIMEOUT="1s"
+INPUT_FILE="/tmp/in.txt"
+
+while getopts "hc:t:p:i:q:" opt; do
+  case $opt in
+    c) 
+      CWE="$OPTARG"
+      ;;
+    t)
+      TIMEOUT="$OPTARG"
+      ;;
+    p)
+      PRELOAD_PATH="$OPTARG"
+      ;;
+    i)
+      INPUT_FILE="$OPTARG"
+      ;;
+    q)
+      QEMU="$OPTARG"
+      ;;
+    h)
+      usage
+      exit 1
+      ;;
+    *)
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+if [ $OPTIND -eq 1 ]; then 
+  usage
+  exit 1
 fi
+
+touch $INPUT_FILE
 
 # parameter 1: the CWE directory corresponding to the tests
 # parameter 2: the type of tests to run (should be "good" or "bad")
@@ -49,9 +71,17 @@ run_tests()
 
     if [ ! -z "${PRELOAD_PATH}" ]
     then
-      timeout "${TIMEOUT}" LD_PRELOAD="${PRELOAD_PATH}" "${TESTCASE_PATH}" < "${INPUT_FILE}"
+      if [ ! -z "${QEMU}" ]; then
+        timeout "${TIMEOUT}" ${QEMU} -E LD_PRELOAD="${PRELOAD_PATH}" "${TESTCASE_PATH}" < "${INPUT_FILE}"
+      else
+        timeout "${TIMEOUT}" env LD_PRELOAD="${PRELOAD_PATH}" "${TESTCASE_PATH}" < "${INPUT_FILE}"
+      fi
     else
-      timeout "${TIMEOUT}" "${TESTCASE_PATH}" < "${INPUT_FILE}"
+      if [ ! -z "${QEMU}" ]; then
+        timeout "${TIMEOUT}" ${QEMU} "${TESTCASE_PATH}" < "${INPUT_FILE}"
+      else
+        timeout "${TIMEOUT}" "${TESTCASE_PATH}" < "${INPUT_FILE}"
+      fi
     fi
 
     echo "${TESTCASE_PATH} $?" >> "${TYPE_PATH}.run"
