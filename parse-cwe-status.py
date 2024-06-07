@@ -14,6 +14,8 @@ def get_status_str(status: int) -> str:
         return "SIGABRT"
     if status == 124:
         return "TIMEOUT"
+    if status == 139:
+        return "SIGSEGV"
     if status == 0:
         return "OK"
     return str(status)
