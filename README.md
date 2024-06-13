@@ -30,3 +30,8 @@ Run a specific CWE test case:
 python3 juliet.py -cgmr 416
 python3 parse-cwe-status.py bin/CWE416/bad.run
 ```
+
+Run a specific CWE test case compiled with Clang and run the test in QEMU:
+```sh
+ ./juliet.py --c-compiler=clang-15 --cxx-compiler=clang++-15 -cmgrq 121
+```
