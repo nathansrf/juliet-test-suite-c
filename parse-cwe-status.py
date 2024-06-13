@@ -3,6 +3,32 @@ import sys
 import argparse
 import re
 
+cwe_desc = {
+    "CWE121": "Stack Based Buffer Overflow",
+    "CWE122": "Heap Based Buffer Overflow",
+    "CWE124": "Buffer Underwrite",
+    "CWE126": "Buffer Over-read",
+    "CWE127": "Buffer Under-read",
+    "CWE188": "Reliance on Data Memory Layout",
+    "CWE190": "Integer Overflow or Wraparound",
+    "CWE191": "Integer Underflow (Wrap or Wraparound)",
+    "CWE244": "Improper Clearing of Heap Memory Before Release ('Heap Inspection')",
+    "CWE401": "Improper Release of Memory Before Removing Last Reference ('Memory Leak')",
+    "CWE415": "Double Free",
+    "CWE416": "Use After Free",
+    "CWE464": "Addition of Data Structure Sentinel",
+    "CWE467": "Use of sizeof() on a Pointer Type",
+    "CWE468": "Incorrect Pointer Scaling",
+    "CWE469": "Use of Pointer Subtraction to Determine Size",
+    "CWE562": "Return of Stack Variable Address",
+    "CWE587": "Assignment of a Fixed Address to a Pointer",
+    "CWE590": "Free of Memory not on the Heap",
+    "CWE680": "Integer Overflow to Buffer Overflow",
+    "CWE761": "Free of Pointer not at Start of Buffer",
+    "CWE762": "Mismatched Memory Management Routines",
+    "CWE789": "Uncontrolled Memory Allocation",
+    "CWE843": "Access of Resource Using Incompatible Type ('Type Confusion')"
+}
 
 last_df_var = 84
 
@@ -66,6 +92,23 @@ def print_exit_status_stats(status2dfvar: dict[int, list[int]]) -> None:
         st_sum = sum(status2dfvar[status])
         print('{:10s} {:>5d}'.format(get_status_str(status), st_sum))
 
+def print_as_csv(cwe: str, status2dfvar: dict[int, list[int]]) -> None:
+    stats = {
+        "OK": 0,
+        "TIMEOUT": 0,
+        "SIGSEGV": 0,
+        "SIGPROT": 0,
+        "SIGABRT": 0,
+    }
+
+    # if the results has a relevant key, then update the value, otherwise it is left as zero
+    for status in sorted(status2dfvar.keys()):
+        st_sum = sum(status2dfvar[status])
+        stats[get_status_str(status)] = st_sum
+
+    csv_body=f"{cwe},{cwe_desc[cwe]},{stats['OK']},{stats['TIMEOUT']},{stats['SIGSEGV']},{stats['SIGPROT']},{stats['SIGABRT']}"
+    print(csv_body)
+
 
 def print_dataflow_stats(status2dfvar: dict[int, list[int]]) -> None:
     print("\n===== DATAFLOW VARIANTS =====")
@@ -107,9 +150,29 @@ def print_functional_stats(exit_codes: list[int], func_stats: dict[str, dict[int
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Parse Juliet test cases run log")
     parser.add_argument("filename", type=str, help="path to file with run log, e.g. good.run")
+    parser.add_argument("--csv", action="store_true", help="dump exit codes as CSV")
+    parser.add_argument("--csv-with-header", action="store_true", help="display csv with header")
     args = parser.parse_args()
 
+    # Define a regular expression pattern to match CWE<number>
+    pattern = r'CWE(\d+)'
+    match = re.search(pattern, args.filename)
+
+    if match:
+        cwe_number = match.group(0)
+    else:
+        print("CWE<number> not found in the file path.")
+        exit()
+
     (headline, dataflow_stats, functional_stats) = do_parsing(args.filename)
+    if args.csv_with_header:
+        csv_header="cwe,description,ok,timeout,sigsegv,sigprot,sigabrt"
+        print(csv_header)
+        print_as_csv(cwe_number, dataflow_stats)
+        exit()
+    if args.csv:
+        print_as_csv(cwe_number, dataflow_stats)
+        exit()
     print_exit_status_stats(dataflow_stats)
     print_dataflow_stats(dataflow_stats)
     print_functional_stats(sorted(dataflow_stats.keys()), functional_stats)
