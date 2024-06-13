@@ -161,7 +161,6 @@ if __name__ == "__main__":
     if match:
         cwe_number = match.group(0)
     else:
-        print("CWE<number> not found in the file path.")
         exit()
 
     (headline, dataflow_stats, functional_stats) = do_parsing(args.filename)
