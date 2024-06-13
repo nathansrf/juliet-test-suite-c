@@ -22,9 +22,12 @@ def clean(path):
         pass
 
 
-def generate(path, output_dir, keep_going):
+def generate(path, output_dir, keep_going, c_compiler=None, cxx_compiler=None):
     shutil.copy(root_dir + "/CMakeLists.txt", path)
-    retcode = subprocess.Popen(["cmake", "-DOUTPUT_DIR:STRING=" + output_dir, "."], cwd=path).wait()
+    if c_compiler is None or cxx_compiler is None:
+        retcode = subprocess.Popen(["cmake", "-DOUTPUT_DIR:STRING=" + output_dir, "."], cwd=path).wait()
+    else:
+        retcode = subprocess.Popen(["cmake", "-DCMAKE_C_COMPILER="+c_compiler, "-DCMAKE_CXX_COMPILER="+cxx_compiler, "-DOUTPUT_DIR:STRING=" + output_dir, "."], cwd=path).wait()
     if retcode != 0 and not keep_going:
         juliet_print("error generating " + path + " - stopping")
         exit()
@@ -66,6 +69,8 @@ if __name__ == "__main__":
     parser.add_argument("-t", "--run-timeout", action="store", default="1", type=float, help="specify the default test run timeout in seconds (type: float, default: 1)")
     parser.add_argument("-q", "--qemu", action="store_true", help="enable running of test in usermode QEMU")
     parser.add_argument("--qemu_path", action="store", default="qemu-aarch64", type=str, help="path to qemu binary (default 'qemu-aarch64')")
+    parser.add_argument("--c-compiler", action="store", default="", type=str, help="name of c compiler, e.g. clang-15")
+    parser.add_argument("--cxx-compiler", action="store", default="", type=str, help="name of c++ compiler, e.g. clang++15")
     args = parser.parse_args()
     args.CWEs = set(args.CWEs)
 
@@ -97,7 +102,10 @@ if __name__ == "__main__":
                     clean(path)
                 if args.generate:
                     juliet_print("generating " + path)
-                    generate(path, args.output_dir, args.keep_going)
+                    if args.c_compiler and args.cxx_compiler:
+                        generate(path, args.output_dir, args.keep_going, c_compiler=args.c_compiler, cxx_compiler=args.cxx_compiler)
+                    else:
+                        generate(path, args.output_dir, args.keep_going)
                 if args.make:
                     juliet_print("making " + path)
                     make(path, args.keep_going)
