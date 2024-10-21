@@ -38,6 +38,8 @@ def get_status_str(status: int) -> str:
         return "SIGPROT"
     if status - 128 == 6:
         return "SIGABRT"
+    if status - 128 == 4:
+        return "ILLEGAL_INST"
     if status == 124:
         return "TIMEOUT"
     if status == 139:
@@ -99,6 +101,7 @@ def print_as_csv(cwe: str, status2dfvar: dict[int, list[int]]) -> None:
         "SIGSEGV": 0,
         "SIGPROT": 0,
         "SIGABRT": 0,
+        "ILLEGAL_INST": 0,
     }
 
     # if the results has a relevant key, then update the value, otherwise it is left as zero
@@ -106,7 +109,7 @@ def print_as_csv(cwe: str, status2dfvar: dict[int, list[int]]) -> None:
         st_sum = sum(status2dfvar[status])
         stats[get_status_str(status)] = st_sum
 
-    csv_body=f"{cwe},{cwe_desc[cwe]},{stats['OK']},{stats['TIMEOUT']},{stats['SIGSEGV']},{stats['SIGPROT']},{stats['SIGABRT']}"
+    csv_body=f"{cwe},{cwe_desc[cwe]},{stats['OK']},{stats['TIMEOUT']},{stats['SIGSEGV']},{stats['SIGPROT']},{stats['SIGABRT']},{stats['ILLEGAL_INST']}"
     print(csv_body)
 
 
@@ -165,7 +168,7 @@ if __name__ == "__main__":
 
     (headline, dataflow_stats, functional_stats) = do_parsing(args.filename)
     if args.csv_with_header:
-        csv_header="cwe,description,ok,timeout,sigsegv,sigprot,sigabrt"
+        csv_header="cwe,description,ok,timeout,sigsegv,sigprot,sigabrt,illegal_inst"
         print(csv_header)
         print_as_csv(cwe_number, dataflow_stats)
         exit()
